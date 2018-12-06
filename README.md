@@ -8,11 +8,11 @@ Note: Commands described in this documentation assume that you are using a Unix 
 
 ## Resources
 
-* Git clone URL: https://github.com/chuv-pne/dada2.git
-* Documentation: https://github.com/chuv-pne/dada2
+* Git clone URL: https://github.com/chuvpne/dada2.git
+* Documentation: https://github.com/chuvpne/dada2
 * DADA2: https://benjjneb.github.io/dada2
 * illumina-utils: https://github.com/merenlab/illumina-utils
-* docker image with pre-installed environment: https://hub.docker.com/r/chuv-pne/pne-docker
+* docker image with pre-installed environment: https://hub.docker.com/r/chuvpne/pne-docker
 
 ## Rights
 
@@ -32,7 +32,7 @@ R packages are managed using packrat. This ensures maximal reproducibility and p
 
 Note that additional system requirements as well as dependencies may be necessary for the installation of some R packages, such as dada2.
 
-For maximal reproducibility and easy deployement across machines and platforms, you can use docker containers to run RStudio server and illumina-utils commands. A suitable docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuv-pne/pne-docker. Instructions are further provided below in the <b>Working on docker</b> section.
+For maximal reproducibility and easy deployement across machines and platforms, you can use docker containers to run RStudio server and illumina-utils commands. A suitable docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker. Instructions are further provided below in the <b>Working on docker</b> section.
 
 ## Files
 
@@ -50,7 +50,7 @@ If multiple sequencing runs have to be analyzed together, create a directory for
 
 Get a copy of this repository and set it as your working directory:
 ```
-$ git clone https://github.com/chuv-pne/dada2.git my_project_dir
+$ git clone https://github.com/chuvpne/dada2.git my_project_dir
 $ cd my_project_dir
 ```
 
@@ -111,19 +111,19 @@ If not done yet, install docker by following the documentation at https://docs.d
 
 Note: you will have to use sudo with docker commands if docker is not configured to be used as a non-root user. You may have to contact your IT administrator for that.
 
-A docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuv-pne/pne-docker.
+A docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker.
 This docker image comes with pre-installed R, RStudio server and illumina-utils. The R packrat package is also pre-installed and all system requirements for the installation and usage of the R dada2 package are met.
 
 Get a copy of the docker image:
 ```
-$ docker pull chuv-pne/pne-docker
+$ docker pull chuvpne/pne-docker
 ```
 
 Run a docker container:
 ```
 # The -v argument is used to give the docker container access to your local project directory.
 # Replace "/path/to/my_project_dir" by the right path to your project directory.
-$ docker run --rm -v /path/to/my_project_dir:/home/rstudio/project -p 8787:8787 -ti chuv-pne/pne-docker
+$ docker run --rm -v /path/to/my_project_dir:/home/rstudio/project -p 8787:8787 -ti chuvpne/pne-docker
 ```
 
 RStudio server is now running within a docker container, access it from a web browser at the address <a href="localhost:8787" target="_blank">"localhost:8787"</a> and login using the following credentials:

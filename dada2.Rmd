@@ -1,0 +1,358 @@
+---
+title: "DADA2 pipeline"
+output:
+  html_notebook
+---
+```{r knitr, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland
+
+Converting amplicons nucleotides sequences from FASTQ files to a table of Amplicons Sequences Variants (ASV) using the DADA2 pipeline (R package {dada2}).
+
+The full documentation on required files and preparation is available at https://github.com/chuv-pne/dada2.
+
+# Project Information
+
+Fill-in the following tables:
+
+#### Authors
+
+| Author          | email | Address |
+|-----------------|-------|---------|
+| ...      |       |         |
+
+#### Project
+
+| Name | Description | Contact |
+|------|-------------|---------|
+| ...  |             |   |
+
+#### Sequencing Details
+
+| Run ID | Amplicon type | Amplicon primers | Seq. platform | Seq. kit | Seq. date | Seq. place |
+|------|-------------|---------|--------------|----|------|-------|
+| ...  |  |  |  |  | |  |
+
+# Demultiplexing
+
+Demultiplexing is performed using the `iu-demultiplex` command from the illumina-utils FASTQ files processing toolbox.
+```{bash demultiplexing, eval=FALSE}
+# BASH
+# For each run, store demultiplexed sequences in a new directory named "demultiplexed"
+ls -d run_data/* \
+  | parallel -j -2 'outputdir=demultiplexed; [[ ! -d {}/"${outputdir}" ]] && mkdir {}/"${outputdir}"; iu-demultiplex -s {}/barcodes.txt --r1 {}/R1.fastq --r2 {}/R2.fastq -i {}/Index.fastq -x -o {}/"${outputdir}"'
+```
+# Running the DADA2 pipeline
+
+## Environment setup
+
+Install required R librairies with packrat:
+```{r packrat, eval=FALSE}
+# R
+packrat::restore() # This can take a while
+```
+
+Load required R librairies:
+```{r packages, eval=TRUE}
+# R
+version$version.string
+suppressMessages(library(dada2)); packageVersion("dada2")
+suppressMessages(library(foreach)); packageVersion("foreach")
+suppressMessages(library(doParallel)); packageVersion("doParallel")
+suppressMessages(library(ggplot2)); packageVersion("ggplot2")
+suppressMessages(library(ggpubr)); packageVersion("ggpubr")
+suppressMessages(library(reshape2)); packageVersion("reshape2")
+```
+Enable distribution of computation over multiple computing cores (parallelization):
+```{r parallization, eval=T}
+# R
+cores <- detectCores()
+nc <- cores[1]
+if (nc > 3) {
+  nc <- nc-2  # leave 2 cores free if > 3 cores availables
+}
+cl <- makeCluster(nc)
+registerDoParallel(cl)
+paste(nc, "cores used")
+```
+```{r, eval=F}
+# R
+# Set seed for pseudo-random numbers generation
+set.seed(2)
+```
+
+## Quality Check
+
+The dada2 `plotQualityProfile` function plots a visual summary of the distribution of quality scores as a function of sequence position for the input fastq file.
+
+This can take minutes to hours.
+```{r quality profiles, eval=F}
+# R
+runs.dirs <- list.dirs("run_data", recursive = F)
+runs <- basename(runs.dirs)
+
+plots <- foreach(i=1:length(runs), .packages = c("dada2", "ggplot2")) %dopar% {
+  p <- list()
+  p[[1]] <- plotQualityProfile(file.path(runs.dirs[i], "R1.fastq"), n = 1e+06) +
+    ggtitle(paste("Forward reads |", runs[i], sep=" "))
+  p[[2]] <- plotQualityProfile(file.path(runs.dirs[i], "R2.fastq"), n = 1e+06) +
+    ggtitle(paste("Reverse reads |", runs[i], sep=" "))
+  p
+}
+
+# Store the quailty profile in the run directory
+for (i in 1:length(runs)) {
+  saveRDS(plots[[i]], file.path(runs.dirs[i], "quality_score.pdf.rds"))
+  pdf(file.path(runs.dirs[i], "quality_score.pdf"))
+  invisible(lapply(plots[[i]], print))
+  invisible(dev.off())
+}
+```
+
+Combine quality profiles of all runs in a condensed summary.
+
+```{r, eval=T, fig.width=14, fig.height=14}
+# R
+nplot.pp <- 4  # number of plots per page
+ncol.pp <- 2  # number of columns in a page
+fig <- foreach(i=seq(1, length(unlist(plots, recursive = F)), by=nplot.pp), .packages = c("ggpubr")) %dopar% {
+  ggarrange(plotlist=unlist(plots, recursive = F)[i:(i+nplot.pp-1)], ncol=ncol.pp, nrow=nplot.pp/ncol.pp)
+}
+invisible(lapply(fig, print))
+```
+In gray-scale is a heat map of the frequency of each quality score at each base position. The median quality score at each position is shown by the green line, and the quartiles of the quality score distribution by the orange lines. The reverse reads are usually of worse quality, especially at the end, which is common in Illumina sequencing.
+
+```{r, eval=FALSE}
+# R
+# Store the quality profile summary in fig/quality_score.pdf
+dir.create("fig")
+pdf("fig/quality_score.pdf", paper="a4")
+  invisible(lapply(fig, print))
+invisible(dev.off())
+```
+
+## Quality Filtering & Trimming
+
+The dada2 `filterAndTrim` function trims sequences to a specified length, removes sequences shorter than that length, and filters based on the number of ambiguous bases, a minimum quality score, and the expected errors in a read. Based on the quality profiles, adjust the trimming (for each run). Your reads must still overlap after truncation in order to merge them later (basic rule is truncLen must be large enough to maintain 20 + biological.length.variation nucleotides of overlap between them).
+
+```{r filtering and trimming, eval=FALSE}
+# R
+# For each run, store the filtered sequences in a new directory named "filtered"
+filterAndTrim.out <- foreach(i=1:length(runs), .packages = c("dada2", "ggplot2")) %do% {
+  fwd.fn <- sort(list.files(file.path(runs.dirs[i], "demultiplexed"), pattern = '-R1.fastq'))
+  rev.fn <- sort(list.files(file.path(runs.dirs[i], "demultiplexed"), pattern = '-R2.fastq'))
+  filterAndTrim(fwd=file.path(runs.dirs[i], "demultiplexed", fwd.fn),
+                filt=file.path(runs.dirs[i], "filtered", fwd.fn),
+                rev=file.path(runs.dirs[i], "demultiplexed", rev.fn),
+                filt.rev=file.path(runs.dirs[i], "filtered", rev.fn),
+                truncLen=c(240, 200),
+                maxEE=c(5, 7),
+                truncQ=0,
+                maxN=0,
+                rm.phix=TRUE,
+                compress=TRUE,
+                verbose=TRUE,
+                multithread=nc)
+}
+
+# Store the filtering report in the run directory
+filt.plots <- foreach(i=1:length(runs), .packages = c("ggplot2", "reshape2")) %do% {
+  saveRDS(filterAndTrim.out[[i]], "filtering_report.rds")
+  data <- as.data.frame(filterAndTrim.out[[i]])
+  row.names(data) <- gsub("-R1.fastq", "", row.names(data))
+  data$reads.in <- data$reads.in - data$reads.out
+  p <- ggplot(melt(as.matrix(data)), aes(x=Var1, y=value, fill=Var2)) +
+    geom_bar(stat="identity") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    labs(title = runs[i], x = "Samples", y = "Reads", fill = NULL)
+  saveRDS(p, "filtering_report.pdf.rds")
+  pdf(file.path(runs.dirs[i], "filtering_report.pdf"))
+  print(p)
+  invisible(dev.off())
+  p
+}
+pdf("fig/filtering_report.pdf")
+invisible(lapply(filt.plots, print))
+invisible(dev.off())
+```
+```{r, eval=T}
+# R
+invisible(lapply(filt.plots, print))
+```
+
+
+## Sequencing Error Model Generation
+
+The DADA2 algorithm makes use of a parametric error model err and every amplicon dataset has a different set of error rates. The learnErrors method learns this error model from the data, by alternating estimation of the error rates and inference of sample composition until they converge on a jointly consistent solution.
+
+```{r error model, eval=FALSE}
+# R
+err.model <- foreach(i = 1:length(runs), .packages = c("dada2", "ggplot2")) %dopar% {
+  fwd.fn <- sort(list.files(file.path(runs.dirs[i], "filtered"), pattern = '-R1.fastq'))
+  rev.fn <- sort(list.files(file.path(runs.dirs[i], "filtered"), pattern = '-R2.fastq'))
+  err <- list()
+  err[[1]] <- learnErrors(file.path(runs.dirs[i], "filtered", fwd.fn), nbases=1e8, multithread=nc)
+  err[[2]] <- learnErrors(file.path(runs.dirs[i], "filtered", rev.fn), nbases=1e8, multithread=nc)
+  err
+}
+# Plot the error model
+err.plots <- foreach(i = 1:length(runs), .packages = c("dada2", "ggplot2")) %do% {
+  p <- list()
+  p[[1]] <- plotErrors(err.model[[i]][[1]], nominalQ=TRUE) +
+                   ggtitle(paste(runs[i], "| forward reads"))
+  p[[2]] <- plotErrors(err.model[[i]][[2]], nominalQ=TRUE) +
+                   ggtitle(paste(runs[i], "| reverse reads"))
+  p
+}
+
+# Store the error model in the run directory
+for (i in 1:length(runs)) {
+  saveRDS(err.model[[i]], file.path(runs.dirs[i], "error_model.rds"))
+  saveRDS(err.plots[[i]], file.path(runs.dirs[i], "error_model.pdf.rds"))
+  pdf(file.path(runs.dirs[i], "error_model.pdf"))
+  invisible(lapply(err.plots[[i]], print))
+  invisible(dev.off())
+}
+```
+
+Combine error models of all runs in a condensed summary.
+
+```{r, eval=T, fig.width=14, fig.height=14}
+# R
+nplot.pp <- 4  # number of plots per page
+ncol.pp <- 2  # number of columns in a page
+fig <- foreach(i=seq(1, length(unlist(err.plots, recursive = F)), by=nplot.pp), .packages = c("ggpubr")) %dopar% {
+  ggarrange(plotlist=unlist(err.plots, recursive = F)[i:(i+nplot.pp-1)], ncol=ncol.pp, nrow=nplot.pp/ncol.pp)
+}
+invisible(lapply(fig, print))
+```
+
+Transitions (A→C, A→G, …) are shown. Points are the observed error rates for each consensus quality score. The black line shows the estimated error rates after convergence of the machine-learning algorithm. The red line shows the error rates expected under the nominal definition of the Q-score. Here the estimated error rates (black line) are a good fit to the observed rates (points), and the error rates drop with increased quality as expected.
+
+```{r, eval=FALSE}
+# R
+# Store the error model summary in fig/error_model.pdf
+pdf("fig/error_model.pdf", paper="a4")
+  invisible(lapply(fig, print))
+invisible(dev.off())
+```
+
+## Sequences Dereplication
+
+Dereplication combines all identical sequencing reads into into “unique sequences” with a corresponding “abundance” equal to the number of reads with that unique sequence. Dereplication in the DADA2 pipeline has one crucial addition from other pipelines: DADA2 retains a summary of the quality information associated with each unique sequence. The consensus quality profile of a unique sequence is the average of the positional qualities from the dereplicated reads. The consensus scores are then used by the error model of the dada function.
+
+```{r seq dereplication, eval=FALSE}
+# R
+derep <- foreach(i=1:length(runs), .packages = c("dada2")) %dopar% {
+  fwd.fn <- sort(list.files(file.path(runs.dirs[i], "filtered"), pattern = '-R1.fastq'))
+  rev.fn <- sort(list.files(file.path(runs.dirs[i], "filtered"), pattern = '-R2.fastq'))
+  out <- list()
+  out[[1]] <- derepFastq(file.path(runs.dirs[i], "filtered", fwd.fn))
+  out[[2]] <- derepFastq(file.path(runs.dirs[i], "filtered", rev.fn))
+  saveRDS(out, file.path(runs.dirs[i], "derep.rds"))
+  out
+}
+```
+
+## Amplicon Sequence Variants (ASVs) Inference
+
+The core method of the dada2 package is at the sample inference stage (the dada function). It will assign all reads to an error-corrected sequence using the models of the error rates of the previous step.
+
+```{r asv inference, eval=FALSE}
+# R
+asv <- foreach(i=1:length(runs), .packages = c("dada2")) %do% {
+  out <- list()
+  out[[1]] <- dada(derep[[i]][[1]], err=err.model[[i]][[1]], pool = TRUE, multithread=nc)
+  out[[2]] <- dada(derep[[i]][[2]], err=err.model[[i]][[2]], pool = TRUE, multithread=nc)
+  saveRDS(out, file.path(runs.dirs[i], "asv.rds"))
+  out
+}
+```
+
+## Paired-ends Merging
+
+This step performs a global ends-free alignment between paired forward and reverse reads and merges them together if they exactly overlap. It requires that the input forward and reverse reads are in the same order. Note that merging in the DADA2 pipeline happens after denoising, hence the strict requirement of exact overlap since it is expected that nearly all substitution errors have already been removed.
+
+```{r pe merging, eval=FALSE}
+# R
+merged <- foreach(i=1:length(runs), .packages = c("dada2")) %dopar% {
+  out <- mergePairs(asv[[i]][[1]], derep[[i]][[1]], asv[[i]][[2]], derep[[i]][[2]])
+  saveRDS(out, file.path(runs.dirs[i], "merged_asv.rds"))
+  out
+}
+```
+
+## Count Table Generation
+
+A table with amplicon sequence variants is constructed.
+
+```{r counts, eval=FALSE}
+# R
+seqtabs <- foreach(i=1:length(runs), .packages = c("dada2")) %dopar% {
+  st <- makeSequenceTable(merged[[i]])
+  saveRDS(st, file.path(runs.dirs[i], "seqtab.rds"))
+  st
+}
+```
+
+## Merging Runs
+
+```{r merging runs, eval=FALSE}
+# R
+if (length(seqtabs) == 1) {
+  seqtab <- seqtabs[[1]]
+  rm(seqtabs)
+} else {
+  seqtab <- mergeSequenceTables(tables = seqtabs)
+}
+
+# Save data into a new directory named "data"
+dir.create("data")
+saveRDS(seqtab, "data/seqtab.rds")
+```
+
+## Chimera Screening
+
+The dada algorithm models and removes substitution errors, but chimeras are another importance source of spurious sequences in amplicon sequencing. Chimeras are formed during PCR amplification. When one sequence is incompletely amplified, the incomplete amplicon primes the next amplification step, yielding a spurious amplicon. The result is a sequence read which is half of one sample sequence and half another.
+
+```{r chimera, eval=FALSE}
+# R
+seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=nc, verbose = T)
+saveRDS(seqtab.nochim, "data/seqtab_nochim.rds")
+
+# Inspect distribution of sequence lengths after chimera removal
+distrib <- table(nchar(getSequences(seqtab.nochim)))
+distrib.plot <- function(){
+  plot(distrib, xlab = 'Read length', ylab = 'Number of ASVs')
+}
+saveRDS(distrib, "data/length_distribution.rds")
+pdf("fig/length_distribution.pdf")
+distrib.plot()
+invisible(dev.off())
+```
+```{r, eval=T}
+# R
+# Check the dimensions of the table before chimera removal
+dim(seqtab)
+
+# Check the dimensions of the table after chimera removal
+dim(seqtab.nochim)
+
+distrib.plot()
+```
+
+## Taxonomy Assigment
+
+The DADA2 package provides a native implementation of the naive Bayesian classifier method for this purpose. The assignTaxonomy function takes as input a set of sequences to be classified and a training set of reference sequences with known taxonomy, and outputs taxonomic assignments with at least minBoot bootstrap confidence.
+
+```{r taxonomy, eval=FALSE}
+# R
+
+# Path to the DADA2-formatted reference database
+# Note: use -v to mount the database when using docker containers
+db.fp <- "/home/alrapin/db/silva_nr_v132_train_set.fa.gz"
+
+taxonomy <- assignTaxonomy(seqtab.nochim, db.fp, minBoot = 100, multithread=nc)
+saveRDS(taxonomy, "data/taxonomy.rds")
+```

@@ -2,7 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+packrat/lib*/
+packrat/bundles*/
 *.html
 run_data/*
 !*/.gitkeep
-packrat/lib*/

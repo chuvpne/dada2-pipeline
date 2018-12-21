@@ -40,6 +40,7 @@ For maximal reproducibility and easy deployement across machines and platforms, 
 * `R2.fastq.gz`: FASTQ file for the reverse read
 * `Index.fastq.gz`: FASTQ file for the index read
 * `barcode_to_sample.txt`: A text file mapping index barcodes to samples
+* A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz`
 
 It is assumed that the FASTQ files were archived using gzip.
 The `barcode_to_sample.txt` file must contain two tab-delimited columns: the first for samples names and the second for samples barcodes as shown <a href="https://github.com/merenlab/illumina-utils/blob/master/examples/demultiplexing/barcode_to_sample.txt" target="_blank">here</a>. Avoid special characters.
@@ -53,6 +54,15 @@ Get a copy of this repository and set it as your working directory:
 $ git clone https://github.com/chuvpne/dada2.git my_project_dir
 $ cd my_project_dir
 ```
+
+
+If not done yet, get a copy of the DADA2-formatted reference database of your choice at https://benjjneb.github.io/dada2/training.html. We recommend to store it in a directory dedicated to databases instead of keeping it inside the main project directory.
+Per example, create a `db` directory in your home directory and download the Silva version 132 reference database into it (Assuming wget is installed):
+```
+$ mkdir $HOME/db
+$ wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz -P $HOME/db/
+```
+
 
 Place your FASTQ files and the `barcode_to_sample.txt` file in a directory, then place this directory within the directory named `run_data`.
 The final directory structure should look like:
@@ -107,29 +117,14 @@ After loading the `dada2.Rproj` R project file in RStudio, open the `dada2.Rmd` 
 
 ## Working on docker
 
-If not done yet, install docker by following the documentation at https://docs.docker.com/install.
-
-Note: you will have to use sudo with docker commands if docker is not configured to be used as a non-root user. You may have to contact your IT administrator for that.
-
 A docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker.
+See https://github.com/chuvpne/pne-docker for the documentation.
 This docker image comes with pre-installed R, RStudio server and illumina-utils. The R packrat package is also pre-installed and all system requirements for the installation and usage of the R dada2 package are met.
 
-Get a copy of the docker image:
-```
-$ docker pull chuvpne/pne-docker
-```
+The DADA2-formatted reference database must be mounted on the docker container.
+To do that, add the following option to the `docker run` command documented at https://github.com/chuvpne/pne-docker:
 
-Run a docker container:
-```
-# The -v argument is used to give the docker container access to your local project directory.
-# Replace "/path/to/my_project_dir" by the right path to your project directory.
-$ docker run --rm -v /path/to/my_project_dir:/home/rstudio/project -p 8787:8787 -ti chuvpne/pne-docker
-```
+`-v /path/to/train_set.fa.gz:/$USER/db/train_set.fa.gz:ro`
 
-RStudio server is now running within a docker container, access it from a web browser at the address <a href="localhost:8787" target="_blank">"localhost:8787"</a> and login using the following credentials:
-* user: rstudio
-* password: rstudio
+Replace `/path/to/train_set.fa.gz` by the right path to the reference database. Per example: `$HOME/db/silva_nr_v132_train_set.fa.gz`.
 
-From the Rstudio server web interface, set the `project` directory as your working directory.
-
-You are now ready to work, go back to the <b>Usage</b> section above.

@@ -30,9 +30,9 @@ Note: Commands described in this documentation assume that you are using a Unix 
 
 R packages are managed using packrat. This ensures maximal reproducibility and portability of the analysis by using an encapsulated, version controlled, installation of R packages instead of any system-level R packages installation.
 
-Note that additional system requirements as well as dependencies may be necessary for the installation of some R packages, such as dada2.
+Note that additional system requirements as well as dependencies may be necessary for the installation of some R packages.
 
-For maximal reproducibility and easy deployement across machines and platforms, you can use docker containers to run RStudio server and illumina-utils commands. A suitable docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker. Instructions are further provided below in the <b>Working on docker</b> section.
+For maximal reproducibility and easy deployement across machines and platforms, you can open the R Notebook template using RStudio server running on a docker container. A suitable docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker. Instructions are further provided below in the <b>Working on docker</b> section.
 
 ## Files
 
@@ -68,7 +68,7 @@ Place your FASTQ files and the `barcode_to_sample.txt` file in a directory, then
 The final directory structure should look like:
 <pre>
 my_project_dir
-├── <b>run_data</b>
+├── run_data
 |   └── <b>run01</b>
 |       ├── <b>R1.fastq.gz</b>
 |       ├── <b>R2.fastq.gz</b>
@@ -76,16 +76,17 @@ my_project_dir
 |       └── <b>barcode_to_sample.txt</b>
 ├── packrat
 |   └── ...
-├── README.md
+├── dada2.Rmd
+├── dada2.Rproj
 ├── LICENSE.txt
-└── dada2.Rmd
+└── README.md
 </pre>
 
 If multiple sequencing runs have to be analyzed together, place each run directory inside the directory named `run_data`.
 In this case, the final directory structure should look like:
 <pre>
 my_project_dir
-├── <b>run_data</b>
+├── run_data
 |   ├── <b>run01</b>
 |   |   ├── <b>R1.fastq.gz</b>
 |   |   ├── <b>R2.fastq.gz</b>
@@ -106,9 +107,10 @@ my_project_dir
 |       └── <b>barcode_to_sample.txt</b>
 ├── packrat
 |   └── ...
-├── README.md
+├── dada2.Rmd
+├── dada2.Rproj
 ├── LICENSE.txt
-└── dada2.Rmd
+└── README.md
 </pre>
 
 ## Usage
@@ -124,7 +126,7 @@ This docker image comes with pre-installed R, RStudio server and illumina-utils.
 The DADA2-formatted reference database must be mounted on the docker container.
 To do that, add the following option to the `docker run` command documented at https://github.com/chuvpne/pne-docker:
 
-`-v /path/to/train_set.fa.gz:/$USER/db/train_set.fa.gz:ro`
+`-v /path/to/train_set.fa.gz:/home/$USER/db/train_set.fa.gz:ro`
 
 Replace `/path/to/train_set.fa.gz` by the right path to the reference database. Per example: `$HOME/db/silva_nr_v132_train_set.fa.gz`.
 

@@ -22,11 +22,12 @@ Note: Commands described in this documentation assume that you are using a Unix 
 
 ## System requirements
 
-* R 3.5.1
-* R packrat package
-* RStudio
-* illumina-utils: <a href="https://github.com/merenlab/illumina-utils" target="_blank">https://github.com/merenlab/illumina-utils</a>
-* git
+* R 3.5.1: https://www.r-project.org
+* R packrat package: https://cran.r-project.org/web/packages/packrat
+* RStudio: https://www.rstudio.com
+* GNU parallel: https://www.gnu.org/software/parallel
+* illumina-utils: https://github.com/merenlab/illumina-utils
+* git: https://git-scm.com/
 
 R packages are managed using packrat. This ensures maximal reproducibility and portability of the analysis by using an encapsulated, version controlled, installation of R packages instead of any system-level R packages installation.
 
@@ -43,7 +44,16 @@ For maximal reproducibility and easy deployement across machines and platforms, 
 * A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz`
 
 It is assumed that the FASTQ files were archived using gzip.
-The `barcode_to_sample.txt` file must contain two tab-delimited columns: the first for samples names and the second for samples barcodes as shown <a href="https://github.com/merenlab/illumina-utils/blob/master/examples/demultiplexing/barcode_to_sample.txt" target="_blank">here</a>. Avoid special characters.
+
+Please pay particular attention to the format of the files. The following points are critical:
+
+* FASTQ files must use the Phred+33 quality score format and sequences headers (`@` lines) must fit the standard format of the CASAVA 1.8 output:
+
+```
+@EAS139:136:FC706VJ:2:2104:15343:197393 1:N:0:0
+```
+
+* The `barcode_to_sample.txt` file must contain two tab-delimited columns: the first for samples names and the second for samples barcodes as shown <a href="https://github.com/merenlab/illumina-utils/blob/master/examples/demultiplexing/barcode_to_sample.txt" target="_blank">here</a>. Avoid special characters.
 
 If multiple sequencing runs have to be analyzed together, create a directory for each run and place the respective FASTQ and `barcode_to_sample.txt` files inside.
 
@@ -126,7 +136,7 @@ This docker image comes with pre-installed R, RStudio server and illumina-utils.
 The DADA2-formatted reference database must be mounted on the docker container.
 To do that, add the following option to the `docker run` command documented at https://github.com/chuvpne/pne-docker:
 
-`-v /path/to/train_set.fa.gz:/home/$USER/db/train_set.fa.gz:ro`
+`-v /path/to/train_set.fa.gz/directory:/home/$USER/db:ro`
 
-Replace `/path/to/train_set.fa.gz` by the right path to the reference database. Per example: `$HOME/db/silva_nr_v132_train_set.fa.gz`.
+Replace `/path/to/train_set.fa.gz/directory` by the right path to the directory containing the reference database. Per example: `$HOME/db/silva`.
 

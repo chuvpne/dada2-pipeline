@@ -10,35 +10,35 @@ Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaud
 
 Converting amplicons nucleotides sequences from FASTQ files to a table of Amplicons Sequences Variants (ASV) using the DADA2 pipeline (R package {dada2}).
 
-The full documentation on required files and preparation is available at https://github.com/chuv-pne/dada2.
+The full documentation on required files and preparation is available in the README.md file and at https://github.com/chuv-pne/dada2.
 
 # Project Information
 
-Analysis author: 
+Analysis author: (ex: Roger Federer, roger.federe@rf.com)
 
-Investigators: 
+Investigators: (ex: Roger Federer, roger.federe@rf.com)
 
 Date: 
 
-Project: 
+Project: (ex: Myproject)
 
 #### Sequencing Details
 
-Run ID: 
+Run ID: (ex: run01)
 
-Type: 
+Type: (ex: bacterial 16S rRNA gene amplicons v1-v2/F27-R338)
 
-Platform: 
+Platform: (ex: Illumina MiSeq PE v2 2x250)
 
 Date: 
 
-Place: 
+Place: (ex: Lambda sequencing facility)
 
 # Demultiplexing
 
 Demultiplexing is performed using the `iu-demultiplex` command from the illumina-utils FASTQ files processing toolbox.
 If multiple runs have to be processed, this will be done in parallel. The `-j` argument in the `parallel` command specifies the number of computing cores to use. You may edit it to your need (considering both available CPUs and memory).
-```{bash demultiplexing, eval=FALSE}
+```{bash demultiplexing, eval=F}
 # BASH
 # For each run, store demultiplexed sequences in a new directory named "demultiplexed"
 ls -d run_data/* \
@@ -383,6 +383,16 @@ pdf("fig/length_distribution.pdf")
 distrib.plot()
 invisible(dev.off())
 ```
+```{r, eval=F, echo=F}
+# R
+# Recover variables for next chunck
+seqtab <- readRDS("data/seqtab.rds")
+seqtab.nochim <- readRDS("data/seqtab_nochim.rds")
+distrib <- readRDS("data/length_distribution.rds")
+distrib.plot <- function(){
+  plot(distrib, xlab = 'Read length', ylab = 'Number of ASVs')
+}
+```
 ```{r, eval=T}
 # R
 # Check the dimensions of the table before chimera removal
@@ -459,7 +469,7 @@ seqtab.nochim <- readRDS("data/seqtab_nochim.rds")
 
 # Path to the DADA2-formatted reference database
 # Note: use -v to mount the database when using docker containers
-# Replace "/path/to/train_set.fa.gz" by the right path to the reference database 
+# Replace "/path/to/train_set.fa.gz" by the right path to the reference database (ex:"/home/user/db/silva_nr_v132_train_set.fa.gz")
 db.fp <- "/path/to/train_set.fa.gz"
 
 taxonomy <- assignTaxonomy(seqtab.nochim, db.fp, minBoot = 100, multithread=nc)
@@ -474,12 +484,12 @@ The dada2 package also implements a method to make species level assignments bas
 # Recover variables for next chunck
 taxonomy <- readRDS("data/taxonomy.rds")
 ```
-```{r taxonomy to specie, eval=FALSE}
+```{r species, eval=FALSE}
 # R
 
 # Path to the DADA2-formatted reference database for species assignment
 # Note: use -v to mount the database when using docker containers
-# Replace "/path/to/species_assignment.fa.gz" by the right path to the species-assigned reference database 
+# Replace "/path/to/species_assignment.fa.gz" by the right path to the reference database for species assignment (ex:"/home/user/db/silva_species_assignment_v132.fa.gz")
 db.fp <- "/path/to/species_assignment.fa.gz"
 
 taxonomy.species <- addSpecies(taxonomy, db.fp)
@@ -513,9 +523,35 @@ fwrite(dada2otu(seqtab.nochim, taxonomy.species), "data/otu_table.txt", quote = 
 
 ## Wrapping Up
 
-Create a zip archive with final data, figures, code and report.
+Compile all barcode_to_sample.txt files into a single mapping file stored in the `data` directory.
+
+Archive the initial, multiplexed fastq files along with the `barcode_to_sample.txt` files and run-specific figures and intermediate files in an archive named `run_data.tar.gz`.
+
+Finaly, create a html report and archive it along with final data, figures, packrat .lock and package sources as well as this R Notebook. Intermediate files and compiled R libraries will be ignored.
 
 ```{bash eval=F}
 # BASH
-zip -r dada2.zip data fig dada2.Rmd dada2.nb.html README.md LICENSE.txt
+# Create a global mapping file
+[[ -e "data/map.txt" ]] && rm "data/map.txt"
+ls -d run_data/* \
+  | parallel -j -2 'sed -e "s|$| \t"{/}"|g" {}/barcode_to_sample.txt >> data/map.txt'
+```
+```{bash eval=F}
+# BASH
+# Archive the multiplexed fastq files
+ls -d run_data/* \
+  | parallel -j -2 'gzip {}/*.fastq'
+[[ ! -d run_data_archives ]] && mkdir run_data_archives
+ls run_data/* -d \
+  | parallel -j -2 'cd {} && tar zcvmf ../../run_data_archives/{/}.tar.gz --exclude=*demultiplexed* --exclude=*filtered* *'
+```
+```{r render, eval=F}
+# R
+# Create a html report
+rmarkdown::render("dada2.Rmd")
+```
+```{bash eval=F}
+# BASH
+# Archive the results
+zip -r dada2.zip --exclude=packrat/lib* data fig packrat dada2.Rmd dada2.Rproj dada2.nb.html README.md LICENSE.txt
 ```

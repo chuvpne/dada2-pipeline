@@ -127,6 +127,8 @@ my_project_dir
 
 After loading the `dada2.Rproj` R project file in RStudio, open the `dada2.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments.
 
+At the end of the pipeline, inital files and results are archived into two separate archives. Store them in a safe place!
+
 ## Working on docker
 
 A docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker.

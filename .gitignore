@@ -9,3 +9,6 @@ packrat/bundles*/
 example.Rmd
 run_data/*
 !*/.gitkeep
+data/
+fig/
+Rplots*

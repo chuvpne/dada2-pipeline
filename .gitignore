@@ -5,5 +5,7 @@
 packrat/lib*/
 packrat/bundles*/
 *.html
+!example.nb.html
+example.Rmd
 run_data/*
 !*/.gitkeep

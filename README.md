@@ -41,7 +41,7 @@ For maximal reproducibility and easy deployement across machines and platforms, 
 * `R2.fastq.gz`: FASTQ file for the reverse read
 * `Index.fastq.gz`: FASTQ file for the index read
 * `barcode_to_sample.txt`: A text file mapping index barcodes to samples
-* A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz`
+* A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.
 
 It is assumed that the FASTQ files were archived using gzip.
 
@@ -71,6 +71,7 @@ Per example, create a `db` directory in your home directory and download the Sil
 ```
 $ mkdir $HOME/db
 $ wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz -P $HOME/db/
+$ wget https://zenodo.org/record/1172783/files/silva_species_assignment_v132.fa.gz -P $HOME/db/
 ```
 
 

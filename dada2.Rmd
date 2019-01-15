@@ -58,6 +58,7 @@ Distribution of computation over multiple computing cores (parallelization) will
 # Install required R librairies with packrat
 packrat::set_opts(use.cache=FALSE)
 packrat::restore()
+.libPaths(file.path("packrat", list.files("packrat", pattern = "lib"), "x86_64-pc-linux-gnu", "3.5.1"))
 ```
 ```{r environment setup, eval=T}
 # Load required R librairies

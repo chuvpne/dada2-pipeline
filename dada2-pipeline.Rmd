@@ -10,7 +10,7 @@ Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaud
 
 Converting amplicons nucleotides sequences from FASTQ files to a table of Amplicons Sequences Variants (ASV) using the DADA2 pipeline (R package {dada2}).
 
-The full documentation on required files and preparation is available in the README.md file and at https://github.com/chuv-pne/dada2.
+The full documentation on required files and preparation is available in the README.md file and at https://github.com/chuvpne/dada2-pipeline.
 
 # Project Information
 
@@ -88,7 +88,7 @@ set.seed(2)
 
 ## Quality Check
 
-The dada2 `plotQualityProfile` function plots a visual summary of the distribution of quality scores as a function of sequence position for the input fastq file.
+The DADA2 `plotQualityProfile` function plots a visual summary of the distribution of quality scores as a function of sequence position for the input fastq file.
 
 This can take minutes to hours.
 ```{r quality profiles, eval=F}
@@ -147,7 +147,7 @@ invisible(dev.off())
 
 ## Quality Filtering & Trimming
 
-The dada2 `filterAndTrim` function trims sequences to a specified length, removes sequences shorter than that length, and filters based on the number of ambiguous bases, a minimum quality score, and the expected errors in a read. Based on the quality profiles, adjust the trimming (for each run). Your reads must still overlap after truncation in order to merge them later (basic rule is truncLen must be large enough to maintain 20 + biological.length.variation nucleotides of overlap between them).
+The DADA2 `filterAndTrim` function trims sequences to a specified length, removes sequences shorter than that length, and filters based on the number of ambiguous bases, a minimum quality score, and the expected errors in a read. Based on the quality profiles, adjust the trimming (for each run). Your reads must still overlap after truncation in order to merge them later (basic rule is truncLen must be large enough to maintain 20 + biological.length.variation nucleotides of overlap between them).
 
 ```{r, eval=F, echo=F}
 # R
@@ -294,7 +294,7 @@ Dereplication combines all identical sequencing reads into into “unique sequen
 
 ### Amplicon Sequence Variants (ASVs) Inference
 
-The core method of the dada2 package is at the sample inference stage (the dada function). It will assign all reads to an error-corrected sequence using the models of the error rates of the previous step.
+The core method of the DADA2 package is at the sample inference stage (the dada function). It will assign all reads to an error-corrected sequence using the models of the error rates of the previous step.
 
 ### Paired-Ends (PE) Merging
 
@@ -478,7 +478,7 @@ saveRDS(taxonomy, "data/taxonomy.rds")
 fwrite(as.data.frame(taxonomy), "data/taxonomy.txt", quote = F, sep = "\t")
 ```
 
-The dada2 package also implements a method to make species level assignments based on exact matching between ASVs and sequenced reference strains. Recent analysis suggests that exact matching (or 100% identity) is the only appropriate way to assign species to 16S gene fragments. Currently, species-assignment training fastas are available for the SILVA and RDP 16S databases.
+The DADA2 package also implements a method to make species level assignments based on exact matching between ASVs and sequenced reference strains. Recent analysis suggests that exact matching (or 100% identity) is the only appropriate way to assign species to 16S gene fragments. Currently, species-assignment training fastas are available for the SILVA and RDP 16S databases.
 
 ```{r, eval=F, echo=F}
 # R
@@ -549,10 +549,10 @@ ls run_data/* -d \
 ```{r render, eval=F}
 # R
 # Create a html report
-rmarkdown::render("dada2.Rmd")
+rmarkdown::render("dada2-pipeline.Rmd")
 ```
 ```{bash eval=F}
 # BASH
 # Archive the results
-zip -r dada2.zip --exclude=packrat/lib* data fig packrat dada2.Rmd dada2.Rproj dada2.nb.html README.md LICENSE.txt
+zip -r dada2-pipeline.zip --exclude=packrat/lib* data fig packrat dada2-pipeline.Rmd dada2-pipeline.Rproj dada2-pipeline.nb.html README.md LICENSE.txt
 ```

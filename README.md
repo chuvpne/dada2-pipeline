@@ -145,3 +145,6 @@ To do that, add the following option to the `docker run` command documented at h
 
 Replace `/path/to/train_set.fa.gz/directory` by the right path to the directory containing the reference database. Per example: `$HOME/db/silva`.
 
+## Contributing
+
+Thank you for your interest in contributing. Get started [here](https://github.com/chuvpne/dada2-pipeline/blob/master/CONTRIBUTING.md).

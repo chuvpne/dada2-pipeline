@@ -538,6 +538,15 @@ printf "#SampleID\tBarcode\tRunID\n" > data/map.txt
 ls -d run_data/* \
   | parallel -j -2 'sed -e "s|$| \t"{/}"|g" {}/barcode_to_sample.txt >> data/map.txt'
 ```
+```{r eval=F}
+# R
+# Add total counts to the global mapping file and rearange samples
+map <- as.data.frame(fread("data/map.txt"))
+row.names(map) <- map[, 1]
+map <- map[row.names(seqtab.nochim), ]
+map$TotalCount <- rowSums(seqtab.nochim)
+fwrite(map, "data/map.txt", quote = F, sep = "\t")
+```
 ```{bash eval=F}
 # BASH
 # Archive the multiplexed fastq files

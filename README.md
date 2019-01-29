@@ -22,28 +22,100 @@ Note: Commands described in this documentation assume that you are using a Unix 
 * License: The R Notebook template (.Rmd) is provided under the MIT license (See LICENSE.txt for details)
 * Authors: A. Rapin, C. Pattaroni, B.J. Marsland
 
+## Citation
+
+If you used this repository in publication, please mention its url.
+Per example:
+```
+The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline.
+```
+
+In addition, you may cite the tools used by this pipeline:
+
+* **DADA2:** Callahan BJ, McMurdie PJ, Rosen MJ, Han AW, Johnson AJA, Holmes SP
+(2016). "DADA2: High-resolution sample inference from Illumina amplicon
+data." _Nature Methods_, *13*, 581-583. doi: 10.1038/nmeth.3869.
+
+* **illumina-utils:** Eren AM, Vineis JH, Morrison HG, Sogin ML (2013). "A Filtering Method to Generate High Quality Short Reads Using Illumina Paired-End Technology." _PLOS ONE_, 8(6). doi: 10.1371/journal.pone.0066643.
+
+
 ## System requirements
 
-* R 3.5.1: https://www.r-project.org
-* R packrat package: https://cran.r-project.org/web/packages/packrat
-* RStudio: https://www.rstudio.com
-* GNU parallel: https://www.gnu.org/software/parallel
-* illumina-utils: https://github.com/merenlab/illumina-utils
-* git: https://git-scm.com/
+* **R 3.5.1:** https://www.r-project.org
+* **R packrat package:** https://cran.r-project.org/web/packages/packrat
+* **RStudio:** https://www.rstudio.com
+* **GNU parallel:** https://www.gnu.org/software/parallel
+* **illumina-utils:** https://github.com/merenlab/illumina-utils
+* **git:** https://git-scm.com/
+
+**Note that additional system requirements as well as dependencies may be necessary for the installation of some R packages.**
+
+For maximal reproducibility and easy deployement across machines and platforms, you can open the R Notebook template using **RStudio server running on a docker container**. A suitable docker image satisfying all system requirements for using the provided R Notebook template is available at **https://hub.docker.com/r/chuvpne/pne-docker**. Instructions are further provided below in the <b>Working on docker</b> section.
+
+#### R
+
+The DADA2 pipeline comes as a R package. Make sure that R is installed before starting.
+
+#### R packrat package
 
 R packages are managed using packrat. This ensures maximal reproducibility and portability of the analysis by using an encapsulated, version controlled, installation of R packages instead of any system-level R packages installation.
 
-Note that additional system requirements as well as dependencies may be necessary for the installation of some R packages.
+Make sure that the packrat R package is installed before starting:
 
-For maximal reproducibility and easy deployement across machines and platforms, you can open the R Notebook template using RStudio server running on a docker container. A suitable docker image satisfying all system requirements for using the provided R Notebook template is available at https://hub.docker.com/r/chuvpne/pne-docker. Instructions are further provided below in the <b>Working on docker</b> section.
+```
+# R
+> install.packages("packrat")
+```
+
+#### RStudio
+
+The `dada2-pipeline.Rmd` file provided in this repository is a R Notebook. As such, it includes both code lines (chunks) and text and can be exported into html and pdf files.
+
+The prefered way of using the `dada2-pipeline.Rmd` file is with the RStudio Integrated Development Environment (IDE). Make sure you have RStudio installed before starting.
+
+#### GNU parallel
+
+GNU parallel is a shell tool to execute jobs in parallel. Some chunks in the `dada2-pipeline.Rmd` R Notebook are written in bash and use GNU parallel to run commands in parallel and reduce computation time.
+Make sure you have GNU parallel installed before starting.
+
+On debian linux, you can install GNU parallel using the `apt-get` package manager command:
+```
+$ apt-get install parallel
+```
+
+You can find the documentation on GNU parallel [here](https://www.gnu.org/software/parallel). There is also an intro video available [here](https://www.youtube.com/playlist?list=PL284C9FF2488BC6D1) and examples [there](https://www.gnu.org/software/parallel/man.html#EXAMPLE:-Working-as-xargs--n1.-Argument-appending).
+
+If needed, use the `man` command:
+```
+$ man parallel
+```
+
+#### illumina-utils
+
+Illumina-utils is a small FASTQ files-processing library.
+Some chunks in the `dada2-pipeline.Rmd` R Notebook use it to demultiplex FASTQ files.
+
+Make sure illumina-utils is installed before starting. Installation instructions are available at https://github.com/merenlab/illumina-utils/.
+
+#### git
+
+This repository is managed using the git distributed version control system. You can get a local copy of it using the `git clone` command.
+If not done yet, install git.
+
+On debian linux, you can install git using the `apt-get` package manager command:
+```
+$ apt-get install git
+```
 
 ## Files
 
-* `R1.fastq.gz`: FASTQ file for the forward read
-* `R2.fastq.gz`: FASTQ file for the reverse read
-* `Index.fastq.gz`: FASTQ file for the index read
-* `barcode_to_sample.txt`: A text file mapping index barcodes to samples
-* A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.
+Before starting, make sure you have the five files listed below:
+
+1. **`R1.fastq.gz`**: FASTQ file for the forward read
+2. **`R2.fastq.gz`**: FASTQ file for the reverse read
+3. **`Index.fastq.gz`**: FASTQ file for the index read
+4. **`barcode_to_sample.txt`**: A text file mapping index barcodes to samples
+5. **A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.**
 
 It is assumed that the FASTQ files were archived using gzip.
 

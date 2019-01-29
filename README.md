@@ -24,11 +24,11 @@ Note: Commands described in this documentation assume that you are using a Unix 
 
 ## Citation
 
-If you used this repository in publication, please mention its url.
+If you used this repository in a publication, please mention its url.
 Per example:
-```
-The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline.
-```
+
+**_The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline._**
+
 
 In addition, you may cite the tools used by this pipeline:
 

@@ -41,6 +41,8 @@ data." _Nature Methods_, *13*, 581-583. doi: 10.1038/nmeth.3869.
 
 ## System requirements
 
+The minimal requirements are listed below then further detailed in this section:
+
 * **R 3.5.1:** https://www.r-project.org
 * **R packrat package:** https://cran.r-project.org/web/packages/packrat
 * **RStudio:** https://www.rstudio.com

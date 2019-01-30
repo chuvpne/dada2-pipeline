@@ -108,7 +108,7 @@ Before starting, make sure you have the five files listed below:
 2. **`R2.fastq.gz`**: FASTQ file for the reverse read
 3. **`Index.fastq.gz`**: FASTQ file for the index read
 4. **`barcode_to_sample.txt`**: A text file mapping index barcodes to samples
-5. **A DADA2-formatted reference database**: see https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.**
+5. A DADA2-formatted reference database: see https://benjjneb.github.io/dada2/training.html. Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`. 
 
 It is assumed that the FASTQ files were archived using gzip.
 

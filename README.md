@@ -108,7 +108,7 @@ Before starting, make sure you have the five files listed below:
 2. **`R2.fastq.gz`**: FASTQ file for the reverse read
 3. **`Index.fastq.gz`**: FASTQ file for the index read
 4. **`barcode_to_sample.txt`**: A text file mapping index barcodes to samples
-5. **A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.**
+5. **A DADA2-formatted reference database**: see https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.**
 
 It is assumed that the FASTQ files were archived using gzip.
 
@@ -193,11 +193,11 @@ my_project_dir
 
 ## Usage
 
-1) Load the `dada2-pipeline.Rproj` R project file in RStudio.
+1. Load the `dada2-pipeline.Rproj` R project file in RStudio.
 
-2) Open the `dada2-pipeline.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments. At the end of the pipeline, inital files and results are archived into two separate archives. 
+2. Open the `dada2-pipeline.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments. At the end of the pipeline, inital files and results are archived into two separate archives. 
 
-3) Store archives in a safe place!
+3. Store archives in a safe place!
 
 ## Working on docker
 

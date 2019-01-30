@@ -212,6 +212,9 @@ filt.plots <- foreach(i=1:length(runs.dirs)) %dopar% {
 invisible(lapply(filt.plots, print))
 ```
 
+If too few reads are passing the filter, consider relaxing `maxEE`, perhaps especially on the reverse reads (eg. `maxEE=c(2,5)`), and reducing the `truncLen` to remove low quality tails. 
+
+*Warning:* Samples with no reads or a very low number of reads passing the filter may interefer further analysis. We therefore recommend to remove them before the next step.     
 
 ## Sequencing Error Model Generation
 

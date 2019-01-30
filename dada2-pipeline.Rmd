@@ -6,7 +6,7 @@ output:
 ```{r knitr, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland
+Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland and Monash University, Melbourne, Australia
 
 Converting amplicons nucleotides sequences from FASTQ files to a table of Amplicons Sequences Variants (ASV) using the DADA2 pipeline (R package {dada2}).
 
@@ -40,9 +40,12 @@ Demultiplexing is performed using the `iu-demultiplex` command from the illumina
 If multiple runs have to be processed, this will be done in parallel. The `-j` argument in the `parallel` command specifies the number of computing cores to use. You may edit it to your need (considering both available CPUs and memory).
 ```{bash demultiplexing, eval=F}
 # BASH
+# If required, activate your illumina-utils virtual environment 
+# source ~/illumina-utils/bin/activate
+
 # For each run, store demultiplexed sequences in a new directory named "demultiplexed"
 ls -d run_data/* \
-  | parallel -j -2 'outputdir=demultiplexed; [[ ! -d {}/"${outputdir}" ]] && mkdir {}/"${outputdir}"; gunzip {}/*.fastq.gz && iu-demultiplex -s {}/barcode_to_sample.txt --r1 {}/R1.fastq --r2 {}/R2.fastq -i {}/Index.fastq -x -o {}/"${outputdir}"'
+  | parallel -j -2 'outputdir=demultiplexed; [[ ! -d {}/"${outputdir}" ]] && mkdir {}/"${outputdir}"; gunzip {}/*.fastq.gz && iu-demultiplex -s {}/barcode_to_sample* --r1 {}/R1.fastq --r2 {}/R2.fastq -i {}/Index.fastq -x -o {}/"${outputdir}"'
 ```
 # Running the DADA2 pipeline
 

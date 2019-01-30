@@ -16,29 +16,6 @@ Note: Commands described in this documentation assume that you are using a Unix 
 * illumina-utils: https://github.com/merenlab/illumina-utils
 * docker image with pre-installed environment: https://hub.docker.com/r/chuvpne/pne-docker
 
-## Rights
-
-* Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland
-* License: The R Notebook template (.Rmd) is provided under the MIT license (See LICENSE.txt for details)
-* Authors: A. Rapin, C. Pattaroni, B.J. Marsland
-
-## Citation
-
-If you used this repository in a publication, please mention its url.
-Per example:
-
-**_The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline._**
-
-
-In addition, you may cite the tools used by this pipeline:
-
-* **DADA2:** Callahan BJ, McMurdie PJ, Rosen MJ, Han AW, Johnson AJA, Holmes SP
-(2016). "DADA2: High-resolution sample inference from Illumina amplicon
-data." _Nature Methods_, *13*, 581-583. doi: 10.1038/nmeth.3869.
-
-* **illumina-utils:** Eren AM, Vineis JH, Morrison HG, Sogin ML (2013). "A Filtering Method to Generate High Quality Short Reads Using Illumina Paired-End Technology." _PLOS ONE_, 8(6). doi: 10.1371/journal.pone.0066643.
-
-
 ## System requirements
 
 The minimal requirements are listed below then further detailed in this section:
@@ -218,6 +195,28 @@ To do that, add the following option to the `docker run` command documented at h
 `-v /path/to/train_set.fa.gz/directory:/home/$USER/db:ro`
 
 Replace `/path/to/train_set.fa.gz/directory` by the right path to the directory containing the reference database. Per example: `$HOME/db/silva`.
+
+## Citation
+
+If you used this repository in a publication, please mention its url.
+Per example:
+
+**_The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline._**
+
+
+In addition, you may cite the tools used by this pipeline:
+
+* **DADA2:** Callahan BJ, McMurdie PJ, Rosen MJ, Han AW, Johnson AJA, Holmes SP
+(2016). "DADA2: High-resolution sample inference from Illumina amplicon
+data." _Nature Methods_, *13*, 581-583. doi: 10.1038/nmeth.3869.
+
+* **illumina-utils:** Eren AM, Vineis JH, Morrison HG, Sogin ML (2013). "A Filtering Method to Generate High Quality Short Reads Using Illumina Paired-End Technology." _PLOS ONE_, 8(6). doi: 10.1371/journal.pone.0066643.
+
+## Rights
+
+* Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland and Monash University, Melbourne, Australia
+* License: The R Notebook template (.Rmd) is provided under the MIT license (See LICENSE.txt for details)
+* Authors: A. Rapin, C. Pattaroni, B.J. Marsland
 
 ## Contributing
 

@@ -33,7 +33,7 @@ For maximal reproducibility and easy deployement across machines and platforms, 
 
 #### R
 
-The DADA2 pipeline comes as a R package. Make sure that R is installed before starting.
+The DADA2 pipeline comes as a R package. Make sure that R (3.5.1 or higher) is installed before starting.
 
 #### R packrat package
 
@@ -76,6 +76,20 @@ Some chunks in the `dada2-pipeline.Rmd` R Notebook use it to demultiplex FASTQ f
 
 Make sure illumina-utils is installed before starting. Installation instructions are available at https://github.com/merenlab/illumina-utils/.
 
+Best is to create a virtual environment for illumina-utils using [virtualenv](https://virtualenv.pypa.io/en/latest/). On debian linux, you can install it using Python package manager `pip` command:
+```
+$ pip install virtualenv
+$ virtualenv -p python3 ~/illumina-utils # important to specify Python3
+$ source ~/illumina-utils/bin/activate
+$ pip install illumina-utils
+```
+
+To activate/deactivate your illumina-utils virtual environment run:
+```
+$ source ~/illumina-utils/bin/activate
+$ deactivate
+```
+
 #### git
 
 This repository is managed using the git distributed version control system. You can get a local copy of it using the `git clone` command.
@@ -108,7 +122,7 @@ Please pay particular attention to the format of the files. The following points
 
 * The `barcode_to_sample.txt` file must contain two tab-delimited columns: the first for samples names and the second for samples barcodes as shown <a href="https://github.com/merenlab/illumina-utils/blob/master/examples/demultiplexing/barcode_to_sample.txt" target="_blank">here</a>. Avoid special characters.
 
-If multiple sequencing runs have to be analyzed together, create a directory for each run and place the respective FASTQ and `barcode_to_sample.txt` files inside.
+If multiple sequencing runs have to be analyzed together, create a directory for each run and place the respective FASTQ and `barcode_to_sample_[runNN].txt` files inside. 
 
 ## Preparation
 
@@ -120,7 +134,7 @@ $ cd my_project_dir
 
 
 If not done yet, get a copy of the DADA2-formatted reference database of your choice at https://benjjneb.github.io/dada2/training.html. We recommend to store it in a directory dedicated to databases instead of keeping it inside the main project directory.
-Per example, create a `db` directory in your home directory and download the Silva version 132 reference database into it (Assuming wget is installed):
+Per example, create a `db` directory in your home directory and download the SILVA version 132 reference database into it (Assuming wget is installed):
 ```
 $ mkdir $HOME/db
 $ wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz -P $HOME/db/
@@ -179,9 +193,11 @@ my_project_dir
 
 ## Usage
 
-After loading the `dada2-pipeline.Rproj` R project file in RStudio, open the `dada2-pipeline.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments.
+1) Load the `dada2-pipeline.Rproj` R project file in RStudio.
 
-At the end of the pipeline, inital files and results are archived into two separate archives. Store them in a safe place!
+2) Open the `dada2-pipeline.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments. At the end of the pipeline, inital files and results are archived into two separate archives. 
+
+3) Store archives in a safe place!
 
 ## Working on docker
 

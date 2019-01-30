@@ -16,29 +16,6 @@ Note: Commands described in this documentation assume that you are using a Unix 
 * illumina-utils: https://github.com/merenlab/illumina-utils
 * docker image with pre-installed environment: https://hub.docker.com/r/chuvpne/pne-docker
 
-## Rights
-
-* Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland
-* License: The R Notebook template (.Rmd) is provided under the MIT license (See LICENSE.txt for details)
-* Authors: A. Rapin, C. Pattaroni, B.J. Marsland
-
-## Citation
-
-If you used this repository in a publication, please mention its url.
-Per example:
-
-**_The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline._**
-
-
-In addition, you may cite the tools used by this pipeline:
-
-* **DADA2:** Callahan BJ, McMurdie PJ, Rosen MJ, Han AW, Johnson AJA, Holmes SP
-(2016). "DADA2: High-resolution sample inference from Illumina amplicon
-data." _Nature Methods_, *13*, 581-583. doi: 10.1038/nmeth.3869.
-
-* **illumina-utils:** Eren AM, Vineis JH, Morrison HG, Sogin ML (2013). "A Filtering Method to Generate High Quality Short Reads Using Illumina Paired-End Technology." _PLOS ONE_, 8(6). doi: 10.1371/journal.pone.0066643.
-
-
 ## System requirements
 
 The minimal requirements are listed below then further detailed in this section:
@@ -56,7 +33,7 @@ For maximal reproducibility and easy deployement across machines and platforms, 
 
 #### R
 
-The DADA2 pipeline comes as a R package. Make sure that R is installed before starting.
+The DADA2 pipeline comes as a R package. Make sure that R (3.5.1 or higher) is installed before starting.
 
 #### R packrat package
 
@@ -99,6 +76,20 @@ Some chunks in the `dada2-pipeline.Rmd` R Notebook use it to demultiplex FASTQ f
 
 Make sure illumina-utils is installed before starting. Installation instructions are available at https://github.com/merenlab/illumina-utils/.
 
+Best is to create a virtual environment for illumina-utils using [virtualenv](https://virtualenv.pypa.io/en/latest/). On debian linux, you can install it using Python package manager `pip` command:
+```
+$ pip install virtualenv
+$ virtualenv -p python3 ~/illumina-utils # important to specify Python3
+$ source ~/illumina-utils/bin/activate
+$ pip install illumina-utils
+```
+
+To activate/deactivate your illumina-utils virtual environment run:
+```
+$ source ~/illumina-utils/bin/activate
+$ deactivate
+```
+
 #### git
 
 This repository is managed using the git distributed version control system. You can get a local copy of it using the `git clone` command.
@@ -117,7 +108,7 @@ Before starting, make sure you have the five files listed below:
 2. **`R2.fastq.gz`**: FASTQ file for the reverse read
 3. **`Index.fastq.gz`**: FASTQ file for the index read
 4. **`barcode_to_sample.txt`**: A text file mapping index barcodes to samples
-5. **A DADA2-formatted reference database (https://benjjneb.github.io/dada2/training.html). Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`.**
+5. A DADA2-formatted reference database: see https://benjjneb.github.io/dada2/training.html. Per example, Silva version 132: `silva_nr_v132_train_set.fa.gz` and `silva_species_assignment_v132.fa.gz`. 
 
 It is assumed that the FASTQ files were archived using gzip.
 
@@ -131,7 +122,7 @@ Please pay particular attention to the format of the files. The following points
 
 * The `barcode_to_sample.txt` file must contain two tab-delimited columns: the first for samples names and the second for samples barcodes as shown <a href="https://github.com/merenlab/illumina-utils/blob/master/examples/demultiplexing/barcode_to_sample.txt" target="_blank">here</a>. Avoid special characters.
 
-If multiple sequencing runs have to be analyzed together, create a directory for each run and place the respective FASTQ and `barcode_to_sample.txt` files inside.
+If multiple sequencing runs have to be analyzed together, create a directory for each run and place the respective FASTQ and `barcode_to_sample_[runNN].txt` files inside. 
 
 ## Preparation
 
@@ -143,7 +134,7 @@ $ cd my_project_dir
 
 
 If not done yet, get a copy of the DADA2-formatted reference database of your choice at https://benjjneb.github.io/dada2/training.html. We recommend to store it in a directory dedicated to databases instead of keeping it inside the main project directory.
-Per example, create a `db` directory in your home directory and download the Silva version 132 reference database into it (Assuming wget is installed):
+Per example, create a `db` directory in your home directory and download the SILVA version 132 reference database into it (Assuming wget is installed):
 ```
 $ mkdir $HOME/db
 $ wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz -P $HOME/db/
@@ -202,9 +193,11 @@ my_project_dir
 
 ## Usage
 
-After loading the `dada2-pipeline.Rproj` R project file in RStudio, open the `dada2-pipeline.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments.
+1. Load the `dada2-pipeline.Rproj` R project file in RStudio.
 
-At the end of the pipeline, inital files and results are archived into two separate archives. Store them in a safe place!
+2. Open the `dada2-pipeline.Rmd` R Notebook template in RStudio and follow the instructions in the text and comments. At the end of the pipeline, inital files and results are archived into two separate archives. 
+
+3. Store archives in a safe place!
 
 ## Working on docker
 
@@ -218,6 +211,28 @@ To do that, add the following option to the `docker run` command documented at h
 `-v /path/to/train_set.fa.gz/directory:/home/$USER/db:ro`
 
 Replace `/path/to/train_set.fa.gz/directory` by the right path to the directory containing the reference database. Per example: `$HOME/db/silva`.
+
+## Citation
+
+If you used this repository in a publication, please mention its url.
+Per example:
+
+**_The implementation of the DADA2 pipeline used to process FASTQ files is available at https://github.com/chuvpne/dada2-pipeline._**
+
+
+In addition, you may cite the tools used by this pipeline:
+
+* **DADA2:** Callahan BJ, McMurdie PJ, Rosen MJ, Han AW, Johnson AJA, Holmes SP
+(2016). "DADA2: High-resolution sample inference from Illumina amplicon
+data." _Nature Methods_, *13*, 581-583. doi: 10.1038/nmeth.3869.
+
+* **illumina-utils:** Eren AM, Vineis JH, Morrison HG, Sogin ML (2013). "A Filtering Method to Generate High Quality Short Reads Using Illumina Paired-End Technology." _PLOS ONE_, 8(6). doi: 10.1371/journal.pone.0066643.
+
+## Rights
+
+* Copyright (c) 2018 Service de Pneumologie, Centre Hospitalier Universitaire Vaudois (CHUV), Switzerland and Monash University, Melbourne, Australia
+* License: The R Notebook template (.Rmd) is provided under the MIT license (See LICENSE.txt for details)
+* Authors: A. Rapin, C. Pattaroni, B.J. Marsland
 
 ## Contributing
 

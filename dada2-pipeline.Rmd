@@ -158,6 +158,17 @@ The DADA2 `filterAndTrim` function trims sequences to a specified length, remove
 runs.dirs <- list.dirs("run_data", recursive = F)
 runs <- basename(runs.dirs)
 ```
+
+```{r set up parameters, eval=F, echo=F}
+# R
+# Set up parameters for filtering and trimming (first parameter stands for R1, second for R2)
+truncLen <- c(240, 200) # Truncate reads after truncLen bases (Default 0, no truncation)
+maxEE <- c(2, 2) # After truncation, reads with higher than maxEE "expected errors" will be discarded, a maxEE 2 is recommended (Default Inf, no EE filtering)
+truncQ <- c(2,2) # Truncate reads at the first instance of a quality score less than or equal to truncQ (Default 2)
+maxN <- c(0,0) # After truncation, sequences with more than maxN Ns will be discarded (Default 0)
+rm.phix <- TRUE # If TRUE, discard reads that match against the phiX genome (Default TRUE)
+```
+
 ```{r filtering and trimming, eval=FALSE}
 # R
 # For each run, store the filtered sequences in a new directory named "filtered"
@@ -169,11 +180,11 @@ for(i in 1:length(runs)) {
                 filt=file.path(runs.dirs[i], "filtered", fwd.fn),
                 rev=file.path(runs.dirs[i], "demultiplexed", rev.fn),
                 filt.rev=file.path(runs.dirs[i], "filtered", rev.fn),
-                truncLen=c(240, 200),
-                maxEE=c(5, 7),
-                truncQ=0,
-                maxN=0,
-                rm.phix=TRUE,
+                truncLen=truncLen,
+                maxEE=maxEE,
+                truncQ=truncQ,
+                maxN=maxN,
+                rm.phix=rm.phix,
                 compress=TRUE,
                 verbose=TRUE,
                 multithread=nc)
@@ -214,7 +225,7 @@ invisible(lapply(filt.plots, print))
 
 If too few reads are passing the filter, consider relaxing `maxEE`, perhaps especially on the reverse reads (eg. `maxEE=c(2,5)`), and reducing the `truncLen` to remove low quality tails. 
 
-*Warning:* Samples with no reads or a very low number of reads passing the filter may interefer further analysis. We therefore recommend to remove them before the next step.     
+*Warning:* Samples with no reads or a very low number of reads passing the filter may interefer further analysis. We therefore recommend removing them before the next step.     
 
 ## Sequencing Error Model Generation
 

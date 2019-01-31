@@ -556,7 +556,7 @@ Finaly, create a html report and archive it along with final data, figures, pack
 [[ -e "data/map.txt" ]] && rm "data/map.txt"
 printf "#SampleID\tBarcode\tRunID\n" > data/map.txt
 ls -d run_data/* \
-  | parallel -j -2 'sed -e "s|$| \t"{/}"|g" {}/barcode_to_sample.txt >> data/map.txt'
+  | parallel -j -2 'sed -e "s|$| \t"{/}"|g" {}/barcode_to_sample* >> data/map.txt'
 ```
 ```{r eval=F}
 # R

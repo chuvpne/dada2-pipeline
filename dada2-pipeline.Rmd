@@ -326,6 +326,7 @@ err.model <- foreach(i=1:length(runs)) %dopar% {
   readRDS(file.path(runs.dirs[i], "error_model.rds"))
 }
 ```
+
 ```{r counts, eval=FALSE}
 # R
 for(i in 1:length(runs)) {
@@ -354,6 +355,8 @@ for(i in 1:length(runs)) {
   saveRDS(st, file.path(runs.dirs[i], "seqtab.rds"))
 }
 ```
+
+Most of your reads should successfully merge. If that is not the case upstream parameters may need to be revisited.
 
 ## Merging Runs
 

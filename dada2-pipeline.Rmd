@@ -513,7 +513,14 @@ taxonomy <- readRDS("data/taxonomy.rds")
 # Replace "/path/to/species_assignment.fa.gz" by the right path to the reference database for species assignment (ex:"/home/user/db/silva_species_assignment_v132.fa.gz")
 db.fp <- "/path/to/species_assignment.fa.gz"
 
-taxonomy.species <- addSpecies(taxonomy, db.fp)
+# Run the taxonomy assignment incrementally to avoid memory overloading (https://github.com/benjjneb/dada2/issues/239)
+chunk.size <- 10000  # size of taxonomy increments
+taxonomy.species <- do.call(rbind,
+                            lapply(split(c(1:nrow(taxonomy)), sort(c(1:nrow(taxonomy))%%ceiling(nrow(taxonomy)/chunk.size))),
+               function(x){
+                 return(addSpecies(taxonomy[x, ], db.fp))
+                 }))
+
 saveRDS(taxonomy.species, "data/taxonomy_species.rds")
 fwrite(as.data.frame(taxonomy.species), "data/taxonomy_species.txt", quote = F, sep = "\t")
 ```

@@ -20,7 +20,7 @@ Note: Commands described in this documentation assume that you are using a Unix 
 
 The minimal requirements are listed below then further detailed in this section:
 
-* **R 3.5.1:** https://www.r-project.org
+* **R 3.6.0:** https://www.r-project.org
 * **R packrat package:** https://cran.r-project.org/web/packages/packrat
 * **RStudio:** https://www.rstudio.com
 * **GNU parallel:** https://www.gnu.org/software/parallel
@@ -33,7 +33,7 @@ For maximal reproducibility and easy deployement across machines and platforms, 
 
 #### R
 
-The DADA2 pipeline comes as a R package. Make sure that R (3.5.1 or higher) is installed before starting.
+The DADA2 pipeline comes as a R package. Make sure that R (3.6.0 or higher) is installed before starting.
 
 #### R packrat package
 

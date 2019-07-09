@@ -229,8 +229,6 @@ invisible(lapply(filt.plots, print))
 
 If too few reads are passing the filter, consider relaxing `maxEE`, perhaps especially on the reverse reads (eg. `maxEE=c(2,5)`), and reducing the `truncLen` to remove low quality tails. 
 
-*Warning:* Samples with no reads or a very low number of reads passing the filter may interefer further analysis. We therefore recommend removing them before the next step.     
-
 ## Sequencing Error Model Generation
 
 The DADA2 algorithm makes use of a parametric error model err and every amplicon dataset has a different set of error rates. The learnErrors method learns this error model from the data, by alternating estimation of the error rates and inference of sample composition until they converge on a jointly consistent solution.
@@ -444,9 +442,9 @@ seqtab.nochim <- readRDS("data/seqtab_nochim.rds")
 track.plots <- foreach(i=1:length(runs), .packages = c("ggplot2", "reshape2")) %do% {
   filtering <- readRDS(file.path(runs.dirs[i], "filtering_report.rds"))
   row.names(filtering) <- gsub("-R1.fastq", "", row.names(filtering))
-  track <- cbind(filtering,
-                 rowSums(seqtab[row.names(filtering), ]),
-                 rowSums(seqtab.nochim[row.names(filtering), ]))
+  track <- cbind(filtering[row.names(filtering) %in% row.names(seqtab)],
+                 rowSums(seqtab[row.names(seqtab) %in% row.names(filtering), ]),
+                 rowSums(seqtab.nochim[row.names(seqtab.nochim) %in% row.names(filtering), ]))
   colnames(track) <- c("Input", "Filtered", "Merged", "Non chimeric")
   for (j in (ncol(track)-1):1) {
     for (k in (j+1):ncol(track)) {

@@ -14,9 +14,9 @@ The full documentation on required files and preparation is available in the REA
 
 # Project Information
 
-Analysis author: (ex: Roger Federer, roger.federe@rf.com)
+Analysis author: (ex: my name, may.name@xy.com)
 
-Investigators: (ex: Roger Federer, roger.federe@rf.com)
+Investigators: (ex: my name, may.name@xy.com)
 
 Date: 
 
@@ -38,6 +38,8 @@ Place: (ex: Lambda sequencing facility)
 
 Demultiplexing is performed using the `iu-demultiplex` command from the illumina-utils FASTQ files processing toolbox.
 If multiple runs have to be processed, this will be done in parallel. The `-j` argument in the `parallel` command specifies the number of computing cores to use. You may edit it to your need (considering both available CPUs and memory).
+
+*Make sure that the files names are consitents (i.e. R1.fastq.gz, R2.fastq.gz, Index.fastq.gz and barcode_to_sample.txt)*
 ```{bash demultiplexing, eval=F}
 # BASH
 # If required, activate your illumina-utils virtual environment 
@@ -56,12 +58,14 @@ This takes a while but will not repeat after first installation.
 
 Distribution of computation over multiple computing cores (parallelization) will be handled by the `doParallel` package.
 
+*Make sure that the packrat library path is correct. If needed, edit the `.libPaths` command accordingly.*
 ```{r packrat, eval=F}
 # R
 # Install required R librairies with packrat
 packrat::set_opts(use.cache=FALSE)
 packrat::restore()
-.libPaths(file.path("packrat", list.files("packrat", pattern = "lib"), "x86_64-pc-linux-gnu", "3.5.1"))
+# Make sure that the packrat library path is correct. If needed, edit the `.libPaths` command accordingly.
+.libPaths(file.path("packrat", list.files("packrat", pattern = "lib"), "x86_64-pc-linux-gnu", "3.6.0"))
 ```
 ```{r environment setup, eval=T}
 # Load required R librairies

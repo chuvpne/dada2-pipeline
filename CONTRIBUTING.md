@@ -12,7 +12,7 @@ Before you get started, please read these guidelines.
 
 1. Create your own fork of the code.
 2. Clone your fork with `git clone`.
-3. Add the original repo as a git remote named `upstream` with `git remote add upstream`.
+3. Add the original repo as a git remote named `upstream` with `git remote add upstream <original repo url>`.
 4. Retrieve the code with `git fetch upstream`.
 5. Set the master branch to the original master branch with `git branch --set-upstream-to=upstream/master master`.
 6. Create a branch with `git checkout -b your_branch_name`.

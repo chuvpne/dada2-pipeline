@@ -1,7 +1,10 @@
 ---
 title: "DADA2 pipeline"
 output:
-  html_notebook
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
 ---
 ```{r knitr, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -14,9 +17,9 @@ The full documentation on required files and preparation is available in the REA
 
 # Project Information
 
-Analysis author: (ex: my name, may.name@xy.com)
+Analysis author: (ex: my name, my.name@xy.com)
 
-Investigators: (ex: my name, may.name@xy.com)
+Investigators: (ex: my name, my.name@xy.com)
 
 Date: 
 
@@ -65,7 +68,10 @@ Distribution of computation over multiple computing cores (parallelization) will
 packrat::set_opts(use.cache=FALSE)
 packrat::restore()
 # Make sure that the packrat library path is correct. If needed, edit the `.libPaths` command accordingly.
-.libPaths(file.path("packrat", list.files("packrat", pattern = "lib"), "x86_64-pc-linux-gnu", "3.6.0"))
+
+.libPaths(file.path("packrat", list.files("packrat", pattern = "lib"),
+                    version$platform,
+                    paste(version$major, version$minor, sep=".")))
 ```
 ```{r environment setup, eval=T}
 # Load required R librairies
@@ -123,7 +129,7 @@ for (i in 1:length(runs)) {
 
 Combine quality profiles of all runs in a condensed summary.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -156,14 +162,14 @@ invisible(dev.off())
 
 The DADA2 `filterAndTrim` function trims sequences to a specified length, removes sequences shorter than that length, and filters based on the number of ambiguous bases, a minimum quality score, and the expected errors in a read. Based on the quality profiles, adjust the trimming (for each run). Your reads must still overlap after truncation in order to merge them later (basic rule is truncLen must be large enough to maintain 20 + biological.length.variation nucleotides of overlap between them).
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
 runs <- basename(runs.dirs)
 ```
 
-```{r set up parameters, eval=F, echo=F}
+```{r set up parameters, eval=F, echo=T}
 # R
 # Set up parameters for filtering and trimming (first parameter stands for R1, second for R2)
 truncLen <- c(240, 200) # Truncate reads after truncLen bases (Default 0, no truncation)
@@ -214,7 +220,7 @@ pdf("fig/filtering_report.pdf")
 invisible(lapply(filt.plots, print))
 invisible(dev.off())
 ```
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -233,7 +239,7 @@ If too few reads are passing the filter, consider relaxing `maxEE`, perhaps espe
 
 The DADA2 algorithm makes use of a parametric error model err and every amplicon dataset has a different set of error rates. The learnErrors method learns this error model from the data, by alternating estimation of the error rates and inference of sample composition until they converge on a jointly consistent solution.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -271,7 +277,7 @@ for (i in 1:length(runs)) {
 
 Combine error models of all runs in a condensed summary.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -319,7 +325,7 @@ The core method of the DADA2 package is at the sample inference stage (the dada 
 
 This step performs a global ends-free alignment between paired forward and reverse reads and merges them together if they exactly overlap. It requires that the input forward and reverse reads are in the same order. Note that merging in the DADA2 pipeline happens after denoising, hence the strict requirement of exact overlap since it is expected that nearly all substitution errors have already been removed.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -362,7 +368,7 @@ Most of your reads should successfully merge. If that is not the case upstream p
 
 ## Merging Runs
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -385,7 +391,7 @@ saveRDS(seqtab, "data/seqtab.rds")
 
 The dada algorithm models and removes substitution errors, but chimeras are another importance source of spurious sequences in amplicon sequencing. Chimeras are formed during PCR amplification. When one sequence is incompletely amplified, the incomplete amplicon primes the next amplification step, yielding a spurious amplicon. The result is a sequence read which is half of one sample sequence and half another.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 seqtab <- readRDS("data/seqtab.rds")
@@ -406,7 +412,7 @@ pdf("fig/length_distribution.pdf")
 distrib.plot()
 invisible(dev.off())
 ```
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 seqtab <- readRDS("data/seqtab.rds")
@@ -416,7 +422,7 @@ distrib.plot <- function(){
   plot(distrib, xlab = 'Read length', ylab = 'Number of ASVs')
 }
 ```
-```{r, eval=T}
+```{r, eval=T, collapse=T}
 # R
 # Check the dimensions of the table before chimera removal
 dim(seqtab)
@@ -431,18 +437,22 @@ distrib.plot()
 
 As a final check of our progress, we look at the number of reads that made it through each step in the pipeline. Outside of filtering (first step) there should be no step in which a majority of reads are lost. If a majority of reads failed to merge, you may need to revisit the truncLen parameter used in the filtering step and make sure that the truncated reads span your amplicon. If a majority of reads were removed as chimeric, you may need to revisit the removal of primers, as the ambiguous nucleotides in unremoved primers interfere with chimera identification.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
+runs.dirs <- list.dirs("run_data", recursive = F)
+runs <- basename(runs.dirs)
 seqtab <- readRDS("data/seqtab.rds")
 seqtab.nochim <- readRDS("data/seqtab_nochim.rds")
 ```
 ```{r tracking, eval=FALSE}
 # R
 track.plots <- foreach(i=1:length(runs), .packages = c("ggplot2", "reshape2")) %do% {
+  i <- 1
   filtering <- readRDS(file.path(runs.dirs[i], "filtering_report.rds"))
   row.names(filtering) <- gsub("-R1.fastq", "", row.names(filtering))
-  track <- cbind(filtering[row.names(filtering) %in% row.names(seqtab)],
+
+  track <- cbind(filtering[row.names(filtering) %in% row.names(seqtab), ],
                  rowSums(seqtab[row.names(seqtab) %in% row.names(filtering), ]),
                  rowSums(seqtab.nochim[row.names(seqtab.nochim) %in% row.names(filtering), ]))
   colnames(track) <- c("Input", "Filtered", "Merged", "Non chimeric")
@@ -465,7 +475,7 @@ pdf("fig/read_tracking_report.pdf")
 invisible(lapply(track.plots, print))
 invisible(dev.off())
 ```
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 runs.dirs <- list.dirs("run_data", recursive = F)
@@ -482,7 +492,7 @@ invisible(lapply(track.plots, print))
 
 The DADA2 package provides a native implementation of the naive Bayesian classifier method for this purpose. The assignTaxonomy function takes as input a set of sequences to be classified and a training set of reference sequences with known taxonomy, and outputs taxonomic assignments with at least minBoot bootstrap confidence.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 seqtab.nochim <- readRDS("data/seqtab_nochim.rds")
@@ -502,7 +512,7 @@ fwrite(as.data.frame(taxonomy), "data/taxonomy.txt", quote = F, sep = "\t")
 
 The DADA2 package also implements a method to make species level assignments based on exact matching between ASVs and sequenced reference strains. Recent analysis suggests that exact matching (or 100% identity) is the only appropriate way to assign species to 16S gene fragments. Currently, species-assignment training fastas are available for the SILVA and RDP 16S databases.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 taxonomy <- readRDS("data/taxonomy.rds")
@@ -534,7 +544,7 @@ The DADA2 pipeline provides results as a count table of ASVs per samples and a t
 For compatibility with other data analysis tools, a count table in a tab-delimited text format matching the Qiime classic OTU table format (https://www.drive5.com/usearch/manual/qiime_classic.html) is also created.
 The table contains samples in columns and ASVs in rows. The taxonomy at the species level is added as an extra "taxonomy" column. The first columns contains mock OTU IDs.
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 # R
 # Recover variables for next chunck
 seqtab.nochim <- readRDS("data/seqtab_nochim.rds")
@@ -585,7 +595,7 @@ ls -d run_data/* \
 ls run_data/* -d \
   | parallel -j -2 'cd {} && tar zcvmf ../../run_data_archives/{/}.tar.gz --exclude=*demultiplexed* --exclude=*filtered* *'
 ```
-```{r render, eval=F}
+```{r render, eval=F, echo=F}
 # R
 # Create a html report
 rmarkdown::render("dada2-pipeline.Rmd")
